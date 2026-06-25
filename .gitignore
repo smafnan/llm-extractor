@@ -16,3 +16,7 @@ Thumbs.db
 # Never commit API keys
 .env
 *.key
+
+# Frontend deps (web/dist IS committed so the app runs from a clone)
+web/node_modules/
+web/.vite/

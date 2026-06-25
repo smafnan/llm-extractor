@@ -31,6 +31,24 @@ Keys can also come from the environment (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`,
 
 ---
 
+## 🖥️ Web playground (React + Tailwind + FastAPI)
+
+A polished playground ships with the project: paste a customer message and watch
+it become a clean, validated support ticket — category, urgency, sentiment,
+summary, entities, and a "needs a human" flag, each as a colour-coded field, with
+the raw JSON one click away. It works **offline** via a transparent heuristic;
+pick a provider and paste a key for real LLM extraction.
+
+```bash
+pip install -e ".[web]"
+uvicorn api:app --reload          # open http://localhost:8000
+
+# (optional) rebuild / develop the frontend:
+cd web && npm install && npm run build
+```
+
+The committed `web/dist` means `uvicorn api:app` works straight from a clone.
+
 ## Choose your provider + key
 
 The whole point of the design: one narrow interface (`complete(system, user) ->
