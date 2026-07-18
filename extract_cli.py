@@ -19,7 +19,7 @@ import json
 import os
 import sys
 
-from src.extractor import (
+from extractor import (
     AVAILABLE_PROVIDERS,
     ExtractionError,
     ProviderError,
@@ -27,7 +27,7 @@ from src.extractor import (
     extract,
     get_provider,
 )
-from src.extractor.providers import MockProvider
+from extractor.providers import MockProvider
 
 # Where each provider's key is looked up if --api-key is omitted.
 _ENV_KEYS = {

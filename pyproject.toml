@@ -28,6 +28,16 @@ llm-extract = "extract_cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+# extract_cli.py and api.py live at the project root (outside src/), so they
+# must be listed explicitly or the `llm-extract` console script and `api:app`
+# import target are missing from the installed package entirely.
+[tool.setuptools]
+py-modules = ["extract_cli", "api"]
+
+[tool.setuptools.package-dir]
+"" = "."
+extractor = "src/extractor"
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]

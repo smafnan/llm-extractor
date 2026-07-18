@@ -17,7 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from src.extractor import ExtractionError, ProviderError, SupportTicket, extract, get_provider
+from extractor import ExtractionError, ProviderError, SupportTicket, extract, get_provider
 
 ROOT = Path(__file__).resolve().parent
 

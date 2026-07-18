@@ -20,3 +20,4 @@ Thumbs.db
 # Frontend deps (web/dist IS committed so the app runs from a clone)
 web/node_modules/
 web/.vite/
+web/*.tsbuildinfo
