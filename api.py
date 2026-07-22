@@ -9,6 +9,7 @@ Run:  uvicorn api:app --reload  →  http://localhost:8000
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -21,8 +22,18 @@ from extractor import ExtractionError, ProviderError, SupportTicket, extract, ge
 
 ROOT = Path(__file__).resolve().parent
 
+# Comma-separated list of allowed origins; defaults to the app's real dev
+# origins (Vite dev server + `uvicorn api:app`) so local dev works with no
+# env set. Set ALLOWED_ORIGINS to override for other deployments.
+_DEFAULT_ORIGINS = "http://localhost:5173,http://localhost:8000"
+_allowed_origins = [
+    o.strip()
+    for o in os.environ.get("ALLOWED_ORIGINS", _DEFAULT_ORIGINS).split(",")
+    if o.strip()
+]
+
 app = FastAPI(title="LLM Extractor API", version="1.0.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"],
+app.add_middleware(CORSMiddleware, allow_origins=_allowed_origins, allow_methods=["*"],
                    allow_headers=["*"])
 
 _POS = {"love", "great", "excellent", "amazing", "happy", "perfect", "thanks", "good"}

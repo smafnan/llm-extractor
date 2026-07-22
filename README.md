@@ -65,7 +65,7 @@ python -m venv .venv && source .venv/bin/activate   # Win: .\.venv\Scripts\activ
 pip install -e ".[dev]"        # core (pydantic) + tests
 pip install -e ".[anthropic]"  # add the provider SDK you want (or .[openai], .[gemini], .[all])
 
-pytest -q   # 15 tests, fully offline
+pytest -q   # 23 tests (engine, API, CLI), fully offline
 ```
 
 Try it with no API key, using the built-in mock provider:
@@ -110,7 +110,7 @@ cd web && npm install && npm run build
 
 The committed `web/dist` means `uvicorn api:app` works straight from a clone with no Node toolchain required. The playground's provider dropdown currently offers Anthropic and OpenAI only (Gemini is available via the CLI/library but not yet wired into the web UI).
 
-**Local use only.** The API enables permissive CORS (`allow_origins=["*"]`) and accepts a client-supplied provider key in the request body so the browser demo can call a real LLM directly — this is appropriate for `uvicorn --reload` on localhost, but should not be exposed publicly without adding an origin allowlist and request-size limits first.
+**CORS.** The API's allowed origins come from the `ALLOWED_ORIGINS` env var — a comma-separated list, e.g. `ALLOWED_ORIGINS=https://example.com,https://app.example.com`. With no env set it defaults to the app's real dev origins (`http://localhost:5173` for `npm run dev`, `http://localhost:8000` for `uvicorn api:app`), so local development works out of the box. It also accepts a client-supplied provider key in the request body so the browser demo can call a real LLM directly — appropriate for local dev, but set `ALLOWED_ORIGINS` explicitly (and add request-size limits) before exposing this publicly.
 
 ### Choose your provider + key
 
@@ -145,7 +145,7 @@ src/extractor/
 extract_cli.py                    # --provider / --api-key CLI entry point
 api.py                            # FastAPI backend for the web playground
 web/                               # React + Tailwind playground (built output committed to web/dist)
-tests/                             # 15 offline tests (MockProvider only)
+tests/                             # 23 offline tests: engine (MockProvider), api.py (TestClient), extract_cli.py
 ```
 
 ## Key design decisions
@@ -158,16 +158,12 @@ tests/                             # 15 offline tests (MockProvider only)
 
 ## Limitations
 
-- No test coverage for the three real provider integrations (`anthropic_provider.py`, `openai_provider.py`, `gemini_provider.py`) or for the FastAPI endpoints in `api.py` — only the mock-provider path is exercised by the test suite.
-- The web playground's CORS policy is wide open and takes a client-supplied API key over the request body; it is meant for local development only (see the Quickstart note above).
-- No CI configuration is present in the repository; tests must be run manually.
+- No test coverage for the three real provider integrations (`anthropic_provider.py`, `openai_provider.py`, `gemini_provider.py`) — only the mock-provider path is exercised by the test suite. The FastAPI endpoints in `api.py` and the `extract_cli.py` entry point are covered (`tests/test_api.py`, `tests/test_cli.py`), also via the offline heuristic/mock paths only.
+- The web playground takes a client-supplied API key over the request body; `ALLOWED_ORIGINS` restricts the browser origins allowed to call it (see the Quickstart note above), but this is still meant for local development, not a public deployment.
 - The Gemini provider works through the CLI/library but is not exposed in the web playground's provider dropdown.
-- The engine's `except json.JSONDecodeError` branch in `engine.py` is effectively unreachable — Pydantic v2's `model_validate_json()` raises `ValidationError` (not `json.JSONDecodeError`) for malformed JSON, so that failure path is actually handled by the `ValidationError` branch above it. Functionally harmless, but worth knowing if you're extending the retry logic.
 
 ## Roadmap
 
-- Add a GitHub Actions workflow to run the (fast, fully offline) test suite on every push/PR.
-- Add tests for `api.py` (the heuristic function and both endpoints via FastAPI's `TestClient`).
 - Expose Gemini in the web playground's provider dropdown.
 - Surface provider-specific stop reasons (e.g. refusals, truncation) as distinct, more actionable error types instead of a single generic `ExtractionError`.
 

@@ -124,9 +124,10 @@ def extract(
                 data = schema.model_validate_json(candidate)
                 return ExtractionResult(data=data, attempts=attempt, raw_response=raw)
             except ValidationError as exc:
+                # Pydantic v2's model_validate_json() raises ValidationError for
+                # both malformed JSON (a "json_invalid" error) and schema
+                # mismatches, so this one branch handles both cases.
                 last_error = f"JSON failed schema validation:\n{exc}"
-            except json.JSONDecodeError as exc:
-                last_error = f"Malformed JSON: {exc}"
 
         # Build a corrective follow-up prompt with the exact failure.
         user_prompt = (
